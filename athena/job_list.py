@@ -34,6 +34,7 @@ class JobSoup(BeautifulSoup):
                 'div',
                 {'class': class_}
             )[0]
+            # have had some indexing error here for some reason
             synopsis_tag = container.findChildren('p')[0]
             return synopsis_tag.getText().replace('\n', '').strip()
 
@@ -43,7 +44,7 @@ class JobSoup(BeautifulSoup):
                 'title': title,
                 'link': link,
                 'rate': get_label(card, 'Pay Rate:'),
-                'date-created': datetime.strptime(
+                'created_at': datetime.strptime(
                     get_label(card, 'Date Created:'), '%d/%m/%Y'
                 ),
                 'synopsis': get_synopsis(card, 'detail-long-item px-2 render-md'),
