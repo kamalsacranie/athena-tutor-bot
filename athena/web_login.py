@@ -48,9 +48,12 @@ class Session(object):
             print('Login was unsuccessful or user is not logged in')
             exit()
     
-    @property
-    def page_source(self):
-        return self.driver.page_source
+    def page_source(self, quit: bool=True):
+        source = self.driver.page_source
+        if quit:
+            self.driver.quit()
+            return source
+        return source
 
     def _remove_trailing_slash(self, url: str):
         if len(url) > 1:
