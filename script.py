@@ -29,6 +29,6 @@ if old_jobs:
     else:
         # Diffing the lists to get what jobs are different
         new_jobs = [i for i in jobs if i not in old_jobs]
-        job_emailer = send_update_email(jobs)
+        job_emailer = send_update_email(new_jobs)
 
 pickle.dump(jobs, open('store/last_listed_jobs.p', 'wb'))

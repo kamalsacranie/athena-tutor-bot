@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+from pprint import pprint
+
 
 class JobSoup(BeautifulSoup):
 
