@@ -10,15 +10,19 @@ route = "cal/con/service/"
 
 
 def main():
-
+    # Creating our session object which handles our Selenium operations
     driver = Session(url)
     driver.get_tutorcrunch()
     driver.login(username, password)
     driver.nav_to_page(route)
 
+    # Parse our page source with BS4 using the JobSoup class which inherits
+    # from the classic BeautifulSoup class
     jobs_parser = JobSoup(driver.page_source())
     jobs = jobs_parser.job_dict_list
 
+    # Filtering out the jobs we found last time the script was run so I don't
+    # send myself a duplicate. Serialised using pickle
     try:
         old_jobs = pickle.load(open("store/last_listed_jobs.p", "rb"))
     except FileNotFoundError:
@@ -33,6 +37,7 @@ def main():
             new_jobs = [i for i in jobs if i not in old_jobs]
             send_update_email(new_jobs)
 
+    # Creates our pickled job list for next time
     pickle.dump(jobs, open("store/last_listed_jobs.p", "wb"))
 
 

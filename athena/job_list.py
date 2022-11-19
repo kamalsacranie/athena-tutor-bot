@@ -1,6 +1,7 @@
+from typing import Any
 from bs4 import BeautifulSoup
 from datetime import datetime
-from bs4.element import Tag
+from bs4.element import ResultSet, Tag
 
 
 class JobSoup(BeautifulSoup):
@@ -8,33 +9,36 @@ class JobSoup(BeautifulSoup):
         self.job_cards = self._get_job_list(source)
         self.job_dict_list = self._create_job_dict()
 
-    def _get_job_list(self, source: str):
+    def _get_job_list(self, source: str) -> ResultSet[Any]:
+        # Extracting all the job cards form our source
         job_screen_soup = BeautifulSoup(source, "html.parser")
-        job_cards = job_screen_soup.find_all("div", class_="card card-custom")
+        job_cards = job_screen_soup.find_all(
+            "div", {"class": "card card-custom"}
+        )
         return job_cards
 
-    def _create_job_dict(self):
+    def _create_job_dict(self) -> list[dict[str, str]]:
+        job_dict_list: list[dict[str, Any]] = list()
 
-        job_dict_list = list()
-
-        def get_title(card: Tag):
+        # The following functions just get the relevant info
+        def get_title(card: Tag) -> tuple[str, str]:
             container = card.findChildren("h3")[0]
             anchor = container.findChildren("a")[0]
             title = anchor.getText().replace("\n", "")
             link = anchor.get("href").replace("\n", "")
             return title.strip(), link.strip()
 
-        def get_label(card: Tag, text: str):
+        def get_label(card: Tag, text: str) -> str:
             lable = card.findChildren("label", text=text)[0]
             rate = lable.findNext("div")
             return rate.getText().replace("\n", "").strip()
 
-        def get_synopsis(card, class_):
-            container = card.findChildren("div", {"class": class_})[0]
-            # have had some indexing error here for some reason
+        def get_synopsis(card, element_class) -> str:
+            container = card.findChildren("div", {"class": element_class})[0]
             synopsis_tag = container.findChildren("p")[0]
             return synopsis_tag.getText().replace("\n", "").strip()
 
+        # Populates our job list
         for card in self.job_cards:
             print(type(card))
             title, link = get_title(card)
@@ -52,41 +56,4 @@ class JobSoup(BeautifulSoup):
 
             job_dict_list.append(job_dict)
 
-    # def job_dict_lis_get_job_list(self, source: str):
-    #     job_screen_soup = BeautifulSoup(source, 'html.parser')
-    #     job_cards = job_screen_soup.find_all('div', class_='card card-custom')
-    #     return job_cards
-
-    # def _create_job_dict(self):
-
-    #     job_dict_list = list()
-
-    #     def get_title(card: Tag):
-    #         container = card.findChildren('h3')[0]
-    #         anchor = container.findChildren('a')[0]
-    #         title = anchor.getText().replace('\n', '')
-    #         link = anchor.get('href').replace('\n', '')
-    #         return title.strip(), link.strip()
-
-    #     def get_label(card: Tag, text: str):
-    #         lable = card.findChildren('label', text=text)[0]
-    #         rate = lable.findNext('div')
-    #         return rate.getText().replace('\n', '').strip()
-
-    #     def get_synopsis(card, class_):
-    #         container = card.findChildren(
-    #             'div',
-    #             {'class': class_}
-    #         )[0]
-    #         # have had some indexing error here for some reason
-    #         synopsis_tag = container.findChildren('p')[0]
-    #         return synopsis_tag.getText().replace('\n', '').strip()
-
-    #     for card in self.job_cards:
-    #         print(type(card))
-    #         title, link = get_title(card)
-    #         job_dict = {
-    #             'title': title,
-    #             'link': link,
-    #             'rate': get_label(card, 'Pay Rate:'),
-    #             'created_at': datetime.strptime
+        return job_dict_list
